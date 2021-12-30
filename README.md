@@ -10,7 +10,7 @@ bp.analyze('some_image.png')
 ```
 
 ### Example Output
-The cummulative average is shown by the solid colored line.
+The cumulative average is shown by the solid colored line.
 The moving average with a window size of 100 is shown in light gray.
 The moving average with a window size of 1000 is shown in dark gray.
 
@@ -36,4 +36,4 @@ bp.analyze('some_image.png', large_window_size=500)
 ```
 
 ### Motivation
-Each color in an image serves as a channel where information can be hidden. Furthermore, each bit plane serves as a channel for hiding information. Since there are 3 different colors and 8 bitplanes per color, there are 24 different channels in which information can be hidden. The moving average is graphed in addition to the cummulative average since information can be hidden anywhere along a bitplane. This program is meant to evaluate the effectiveness of various steganography algorithms and to analyze images that are suspected of containing embedded messages. 
+Each color in an image serves as a channel where information can be hidden. Furthermore, each bit plane serves as a channel for hiding information. Since there are 3 different colors and 8 bitplanes per color, there are 24 different channels in which information can be hidden. The moving average is graphed in addition to the cumulative average since information can be hidden anywhere along a bitplane. This program is meant to evaluate the effectiveness of various steganography algorithms and to analyze images that are suspected of containing embedded messages. 
