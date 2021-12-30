@@ -19,7 +19,7 @@ The moving average with a window size of 1000 is shown in dark gray.
 ![Averages Along Blue Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/results_pikachu_blue_10_100_cumulative.png)
 
 ### Disclaimer
-Analysis is painstakingly slow for larger images. For example, analysis is fast for a 100 KB image, but takes notably longer for a 1.5 MB image. 
+Analysis is painstakingly slow for larger images. For example, analysis is fast for a 100 KB image, but takes notably longer for a 1.5 MB image. The program can be made faster at the cost of a less detailed analysis (ex: not calculating the moving averages). Future iterations of the program could use threads to speed things up.
 
 ### Adjusting Default Configuration
 
