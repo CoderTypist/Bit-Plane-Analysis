@@ -1,7 +1,7 @@
 # Bit-Plane-Analysis
 
 ### Description
-Show the moving average and cummulative average along each bit plane for each color (r,g,b). Averages will be between 0 and 1 since each bit plane consists of 0's and 1's.
+Show the moving average and cumulative average along each bit plane for each color (r,g,b). Averages will be between 0 and 1 since each bit plane consists of 0's and 1's.
 
 ### Usage
 ```
