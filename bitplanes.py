@@ -120,8 +120,10 @@ def color_percentages(color_vals, color_name, base_name=None) -> None:
         axs[r,c].set_xlabel('Number of Bytes')
         axs[r,c].set_ylabel('Average')
     
-    if base_name:
-        fname = f'results_{base_name}_{color_name.lower()}'
+    if g.SAVE:
+        fname = 'results'
+        if base_name: fname += f'_{base_name}'
+        fname += '_{color_name.lower()}'
         if g.SMALL: fname += f'_{g.SMALL_WINDOW_SIZE}'
         if g.LARGE: fname += f'_{g.LARGE_WINDOW_SIZE}'
         if g.CUMULATIVE: fname += '_cumulative'
