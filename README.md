@@ -14,6 +14,11 @@ The cumulative average is shown by the solid colored line.
 The moving average with a window size of 100 is shown in light gray.
 The moving average with a window size of 1000 is shown in dark gray.
 
+![Averages Along Blue Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/results_pikachu_blue_10_100_cumulative.png)
+
+### Disclaimer
+Analysis is painstakingly slow for larger images. For example, analysis is fast for a 100 KB image, but takes notably longer for a 1.5 MB image. 
+
 ### Adjusting Default Configuration
 
 ##### Only plot the cumulative average
