@@ -14,6 +14,8 @@ The cumulative average is shown by the solid colored line.
 The moving average with a window size of 100 is shown in light gray.
 The moving average with a window size of 1000 is shown in dark gray.
 
+![Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/results_pikachu_red_10_100_cumulative.png)
+![Averages Along Green Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/results_pikachu_green_10_100_cumulative.png)
 ![Averages Along Blue Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/results_pikachu_blue_10_100_cumulative.png)
 
 ### Disclaimer
