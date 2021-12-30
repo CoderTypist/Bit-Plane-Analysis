@@ -123,7 +123,7 @@ def color_percentages(color_vals, color_name, base_name=None) -> None:
     if g.SAVE:
         fname = 'results'
         if base_name: fname += f'_{base_name}'
-        fname += '_{color_name.lower()}'
+        fname += f'_{color_name.lower()}'
         if g.SMALL: fname += f'_{g.SMALL_WINDOW_SIZE}'
         if g.LARGE: fname += f'_{g.LARGE_WINDOW_SIZE}'
         if g.CUMULATIVE: fname += '_cumulative'
