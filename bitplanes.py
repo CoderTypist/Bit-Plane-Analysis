@@ -78,7 +78,9 @@ def get_bit_plane_percentages(bit_planes: List[List[np.uint8]], window_size=100)
                     i_start = i_val + 1
                     
                 i_end = i_val + 2
-                bit_plane_percentages[i_bp].append(np.sum(bp[i_start:i_end])/window_size)
+                current_window_size = (i_end-1) - i_start
+                bit_plane_percentages[i_bp].append(np.sum(bp[i_start:i_end])/current_window_size)
+                
     print()
     return bit_plane_percentages
     
