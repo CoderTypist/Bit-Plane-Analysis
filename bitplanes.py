@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from typing import Dict, List, Tuple
-
-
+    
+    
 class g:
     
     SAVE = True
@@ -97,9 +97,9 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
     return bit_plane_averages
 
 
-def get_bit_plane_block_percentiles(bit_planes: List[List[np.uint8]], blk_size, bottom=25, middle=50, top=75) -> List[List[Block]]:
+def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size, bottom=25, middle=50, top=75) -> List[List[Block]]:
     
-    bit_plane_block_percentiles: List[List[Block]] = [ [] for i in range(8) ]
+    bit_plane_block_averages: List[List[Block]] = [ [] for i in range(8) ]
     
     if g.VERBOSE:
         if 0 == blk_size:
@@ -131,9 +131,10 @@ def get_bit_plane_block_percentiles(bit_planes: List[List[np.uint8]], blk_size, 
             blk = bp[i_start:i_end]
             mean = np.mean(blk)
             std = np.std(blk)
-            bit_plane_block_percentiles[i_bp].append(Block(mean, std, i_start, cur_blk_size))
-            
-    return bit_plane_block_percentiles
+            bit_plane_block_averages[i_bp].append(Block(mean, std, i_start, cur_blk_size))
+    
+    print()
+    return bit_plane_block_averages
 
     
 def color_averages(color_vals, color_name, base_name=None) -> None:
@@ -150,11 +151,11 @@ def color_averages(color_vals, color_name, base_name=None) -> None:
     
     if g.SMALL:
         if g.SMALL_MOVING: bit_plane_small_window_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_WINDOW_SIZE)
-        else: bit_plane_small_window_averages = get_bit_plane_block_percentiles(bit_planes, g.SMALL_WINDOW_SIZE)
+        else: bit_plane_small_window_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_WINDOW_SIZE)
         
     if g.LARGE: 
         if g.LARGE_MOVING: bit_plane_large_window_averages = get_bit_plane_moving_averages(bit_planes, g.LARGE_WINDOW_SIZE)
-        else: bit_plane_large_window_averages = get_bit_plane_block_percentiles(bit_planes, g.LARGE_WINDOW_SIZE)
+        else: bit_plane_large_window_averages = get_bit_plane_block_averages(bit_planes, g.LARGE_WINDOW_SIZE)
         
     if g.CUMULATIVE: bit_plane_cumulative_averages = get_bit_plane_moving_averages(bit_planes, 0)
     
@@ -260,6 +261,17 @@ def analyze(fname, save=True, verbose=True,
             small_window_size=100, large_window_size=1000,
             small_moving=True, large_moving=True):
     
+    im = Image.open(fname)
+    pix = list(im.getdata())
+    
+    if -1 == small_window_size:
+        num_pixels = len(pix)
+        small_window_size = num_pixels // 50
+    
+    if -1 == large_window_size:
+        num_pixels = len(pix)
+        large_window_size = num_pixels // 10
+        
     set_config(save=save,
                verbose=verbose,
                small=small,
@@ -271,7 +283,41 @@ def analyze(fname, save=True, verbose=True,
                large_moving=large_moving)
     
     base_name = fname.split('.')[0]
-    
-    im = Image.open(fname)
-    pix = list(im.getdata())
     pix_averages(pix, base_name=base_name)
+    
+
+def cumulative_averages(fname, save=True, verbose=True):
+    analyze(fname,
+            save=save,
+            small=False,
+            large=False,
+            cumulative=True)
+
+
+def block_averages(fname, save=True, verbose=True,
+                   small=True, large=True, cumulative=True,
+                   small_block_size=-1, large_block_size=-1):
+    analyze(fname,
+            save=save,
+            small=small,
+            large=large,
+            cumulative=cumulative,
+            small_window_size=small_block_size,
+            large_window_size=large_block_size,
+            small_moving=False, large_moving=False)
+
+
+def moving_averages(fname, save=True, verbose=True,
+                    small=True, large=True, cumulative=True,
+                    small_window_size=100, large_window_size=1000,
+                    small_moving=True, large_moving=True):
+    
+    analyze(fname,
+            save=save,
+            small=small,
+            large=large,
+            cumulative=cumulative,
+            small_window_size=small_window_size,
+            large_window_size=large_window_size,
+            small_moving=small_moving,
+            large_moving=large_moving)
