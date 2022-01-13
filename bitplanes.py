@@ -145,10 +145,6 @@ def color_averages(color_vals, color_name, base_name=None) -> None:
     bit_plane_large_window_averages = None
     bit_plane_cumulative_averages = None
     
-    # only used for block averages
-    bit_plane_small_std = None
-    bit_plane_large_std = None
-    
     if g.SMALL:
         if g.SMALL_MOVING: bit_plane_small_window_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_WINDOW_SIZE)
         else: bit_plane_small_window_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_WINDOW_SIZE)
@@ -266,11 +262,11 @@ def analyze(fname, save=True, verbose=True,
     
     if -1 == small_window_size:
         num_pixels = len(pix)
-        small_window_size = num_pixels // 50
+        small_window_size = num_pixels // 40
     
     if -1 == large_window_size:
         num_pixels = len(pix)
-        large_window_size = num_pixels // 10
+        large_window_size = num_pixels // 8
         
     set_config(save=save,
                verbose=verbose,
@@ -287,6 +283,7 @@ def analyze(fname, save=True, verbose=True,
     
 
 def cumulative_averages(fname, save=True, verbose=True):
+    
     analyze(fname,
             save=save,
             small=False,
