@@ -41,7 +41,7 @@ It is recommended to use __block_averages()__ instead of __moving_averages()__. 
 Each color in an image serves as a channel where information can be hidden. Furthermore, each bit plane serves as a channel for hiding information. Since there are 3 different colors and 8 bitplanes per color, there are 24 different channels in which information can be hidden. The moving average is graphed in addition to the cumulative average since information can be hidden anywhere along a bitplane. This program is meant to evaluate the effectiveness of various steganography algorithms and to analyze images that are suspected of containing embedded messages. 
 
 ---
-## Usage
+### Usage
 * Use __bp.block_averages()__ to calculate block averages.
 * Use __bp.moving_averages()__ to calculate moving averages (this is __SLOW__).
 * Use __bp.cumulative_averages()__ to calculate cumulative averages.
