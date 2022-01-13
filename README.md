@@ -24,10 +24,6 @@ bp.cumulative_averages('some_image.png')
 ### Note
 It is recommended to use __block_averages()__ instead of __moving_averages()__. Block averages are quick. Moving averages can take a LONG time.  __block_averages()__ will divide images into segments and calculate the average for each segment. If using a window/block size of 1000, calculating block averages will be 1000 times faster than calculating the moving averages. 
 
-The cumulative average is shown by the solid colored line.
-The moving average with a window size of 100 is shown in light gray.
-The moving average with a window size of 1000 is shown in dark gray.
-
 ---
 ### Example Output - Block Averages
 ![Block Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_red_51840_259200_cumulative.png)
