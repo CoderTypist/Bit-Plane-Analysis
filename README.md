@@ -76,15 +76,15 @@ bp.block_averages('some_image.png', save=False)
 ```
 bp.moving_averages('some_image.png')
 ```
-##### Disable Small Blocks
+##### Disable Moving Averages with Small Windows
 ```
 bp.moving_averages('some_image.png', small=False)
 ```
-##### Disable Large Blocks
+##### Disable Moving Averages with Large Windows
 ```
 bp.moving_averages('some_image.png', large=False)
 ```
-##### Adjust Block Sizes
+##### Adjust Window Sizes
 ```
 bp.moving_averages('some_image.png', small_block_size=1000, large_block_size=10000)
 ```
