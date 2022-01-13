@@ -30,14 +30,14 @@ The moving average with a window size of 1000 is shown in dark gray.
 
 ---
 ### Example Output - Block Averages
-![Block Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_red_100_1000_cumulative.png)
-![Block Averages Along Green Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_green_100_1000_cumulative.png)
+![Block Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_red_51840_259200_cumulative.png)
+![Block Averages Along Green Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_green_51840_259200_cumulative.png)
 ![Block Averages Along Blue Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_blue_51840_259200_cumulative.png)
 
 ---
 ### Example Output - Moving Averages
-![Moving Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_red_51840_259200_cumulative.png)
-![Moving Averages Along Green Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_green_51840_259200_cumulative.png)
+![Moving Averages Along Red Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_red_100_1000_cumulative.png)
+![Moving Averages Along Green Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_green_100_1000_cumulative.png)
 ![Moving Averages Along Blue Bit Planes](https://github.com/CoderTypist/Bit-Plane-Analysis/blob/main/figures/results_pikachu_blue_51840_259200_cumulative.png)
 
 ---
