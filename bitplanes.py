@@ -7,22 +7,73 @@ from typing import Dict, List, Tuple
     
 class g:
     
+    '''
+    Description
+    -----------
+    Stores global configuration settings for the program.
+    All functions modify and rely on these global settings.
+    
+    '''
+    
+    # save resulting figures to a file
     SAVE = True
+    # show the progress of the program
     VERBOSE = True
     
+    # show the small moving/block averages
     SMALL = True
+    # show the large moving/block averages
     LARGE = True
+    # show the cumulative averages
     CUMULATIVE = True
     
+    # size of the smaller window/block
+    # - specifies the size of the moving window if SMALL_MOVING = True
+    # - specifies the size of the blocks if SMALL_MOVING = False
     SMALL_WINDOW_SIZE = 100
+    # size of the larger window/block
+    # - specifies the size of the moving window if LARGE_MOVING = True
+    # - specifies the size of the blocks if LARGE_MOVING = False
     LARGE_WINDOW_SIZE = 1000
     
+    # whether to calculate moving or block averages for the smaller size
+    # - moving averages are calculated if SMALL_MOVING = True
+    # - block averages are calculated if SMALL_MOVING = False
     SMALL_MOVING = True
+    # whether to calculate moving or block averages for the larger size
+    # - moving averages are calculated if LARGE_MOVING = True
+    # - block averages are calculated if LARGE_MOVING = False
     LARGE_MOVING = True
 
 
 class Block:
+    
+    '''
+    Description
+    -----------
+    Contains information regarding blocks of contiguous bits in a bit plane.
+    
+    '''
+    
     def __init__(self, mean, std, start, size):
+        
+        '''
+        Params
+        ------
+        mean: float
+            The mean of bit values within the block (between 0 and 1).
+            
+        std: float
+            The standard deviation of bit values within the block (between 0 and 1).
+            
+        start: int
+            The index of the bit within the bit plane.
+        
+        size: int
+            The number of bits within the block used to calculate the mean and std.
+
+        '''
+        
         self.mean = mean
         self.std = std
         self.start = start
@@ -30,18 +81,95 @@ class Block:
 
 
 def get_red(pix: List[Tuple[int,int,int]]) -> np.ndarray:
+    
+    '''
+    Description
+    -----------
+        Returns a numpy array of the red value for each pixel.
+    
+    Params
+    ------
+        pix: List[Tuple[int,int,int]]
+            The pixel values for the image.
+    
+    Returns
+    -------
+        np.ndarray[np.uint8]
+            The red values for each pixel.
+            Color values, which are ints, are typecasted to np.uint8 to allow for bitwise operations.
+    
+    '''
+    
     return np.array([ np.uint8(p[0]) for p in pix ])
 
 
 def get_green(pix: List[Tuple[int,int,int]]) -> np.ndarray:
+    
+    '''
+    Description
+    -----------
+        Returns a numpy array of the green value for each pixel.
+    
+    Params
+    ------
+        pix: List[Tuple[int,int,int]]
+            The pixel values for the image.
+    
+    Returns
+    -------
+        np.ndarray[np.uint8]
+            The green values for each pixel.
+            Color values, which are ints, are typecasted to np.uint8 to allow for bitwise operations.
+    
+    '''
+    
     return np.array([ np.uint8(p[1]) for p in pix ])
 
 
 def get_blue(pix: List[Tuple[int,int,int]]) -> np.ndarray:
+    
+    '''
+    Description
+    -----------
+        Returns a numpy array of the blue value for each pixel.
+    
+    Params
+    ------
+        pix: List[Tuple[int,int,int]]
+            The pixel values for the image.
+    
+    Returns
+    -------
+        np.ndarray[np.uint8]
+            The blue values for each pixel.
+            Color values, which are ints, are typecasted to np.uint8 to allow for bitwise operations.
+    
+    '''
+    
     return np.array([ np.uint8(p[2]) for p in pix ])
 
 
 def get_color_bit_planes(color: np.ndarray) -> List[List[np.uint8]]:
+    
+    '''
+    Description
+    -----------
+    Extracts bits from each bit plane.
+    
+    Params
+    ------
+    color: np.ndarray[np.uint8]
+        Contains the values for a single color (i.e. red, green, or blue)
+    
+    Returns
+    -------
+    List[List[np.uint8]]
+        The bits from each bit plane.
+        
+        The outter list contains 8 elements, where each element is a list 
+            containing the values for a bit plane. 
+        
+    '''
     
     bit_planes = [ [] for i in np.arange(8) ]
     
@@ -58,7 +186,30 @@ def get_color_bit_planes(color: np.ndarray) -> List[List[np.uint8]]:
     return bit_planes
 
 
-def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size) -> List[float]:
+def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size) -> List[List[float]]:
+    
+    '''
+    Description
+    -----------
+    Calculates the moving averages along each bit plane.
+    
+    Params
+    ------
+    bit_planes: List[List[np.uint8]]
+        The bits from each bit plane.
+        
+        The outter list contains 8 elements, where each element is a list 
+            containing the values for a bit plane.
+    
+    Returns
+    -------
+    List[List[float]]
+        The moving averages from each bit plane.
+        
+        The outter list contains 8 elements, where each element is a list 
+            containing the moving averages for a bit plane. 
+    
+    '''
 
     bit_plane_averages = [ [] for i in range(8) ]
     
@@ -99,6 +250,30 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
 
 def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> List[List[Block]]:
     
+    '''
+    Description
+    -----------
+    Calculates the block averages along each bit plane.
+    
+    Params
+    ------
+    bit_planes: List[List[np.uint8]]
+        The bits from each bit plane.
+        
+        The outter list contains 8 elements, where each element is a list 
+            containing the values for a bit plane.
+    
+    Returns
+    -------
+    List[List[Block]]
+        Statistics for each block from each bit plane.
+        Statistics for each block are stored within a Block object.
+        
+        The outter list contains 8 elements, where each element is a list 
+            containing the block averages/stds (stored within Block objects) for a bit plane. 
+        
+    '''
+    
     bit_plane_block_averages: List[List[Block]] = [ [] for i in range(8) ]
     
     if g.VERBOSE:
@@ -137,7 +312,33 @@ def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> 
     return bit_plane_block_averages
 
     
-def color_averages(color_vals, color_name, base_name=None) -> None:
+def color_averages(color_vals: np.ndarray, color_name: str, base_name=None) -> None:
+    
+    '''
+    Description
+    -----------
+    Graphs the averages along each bit plane for the received color.
+    
+    Whether block, moving, and/or cumulative averages are calculated is determined by the global settings.
+    The global settings are set by calling functions.
+    
+    Params
+    ------
+    color_vals: np.ndarray[np.uint8]
+        The color values for each pixel (for a single color).
+    
+    color_name: str
+        The name of the color being analyzed (either 'Red', 'Green', or 'Blue')
+    
+    base_name: str = None
+        Part of the filename leading up to the first '.'
+        Used to construct the name of the output file containing the graph.
+        
+    Returns
+    -------
+    None
+    
+    '''
 
     bit_planes = get_color_bit_planes(color_vals)
     
@@ -224,7 +425,26 @@ def color_averages(color_vals, color_name, base_name=None) -> None:
     plt.show()
 
 
-def pix_averages(pix, base_name=None):
+def pix_averages(pix: List[Tuple[int,int,int]], base_name=None) -> None:
+    
+    '''
+    Description
+    -----------
+    Creates figures showing the block/moving/cumulative averages along each bit plane for each color.
+    
+    Params
+    ------
+    pix: List[Tuple[int,int,int]]
+        The pixel values for the image.
+    
+    base_name: str
+        Part of the filename leading up to the first '.'
+    
+    Returns
+    -------
+    None
+    
+    '''
 
     if g.VERBOSE: print('RED:')
     color_averages(get_red(pix), 'Red', base_name=base_name)
@@ -239,23 +459,126 @@ def pix_averages(pix, base_name=None):
 def set_config(save=True, verbose=True,
                small=True, large=True, cumulative=True,
                small_window_size=100, large_window_size=1000,
-               small_moving=True, large_moving=True):
+               small_moving=True, large_moving=True:
     
-     g.SAVE = save
-     g.VERBOSE = verbose
-     g.SMALL = small
-     g.LARGE = large
-     g.CUMULATIVE = cumulative
-     g.SMALL_WINDOW_SIZE = small_window_size
-     g.LARGE_WINDOW_SIZE = large_window_size
-     g.SMALL_MOVING = small_moving
-     g.LARGE_MOVING = large_moving
+    '''
+    Description
+    -----------
+    Sets the global settings used by all functions.
+    
+    Params
+    ------
+    save: bool = True
+        Save the resulting figure.
+    
+    verbose: bool = True
+        Output program progress to the console.
+    
+    small: bool = True
+        Calculate small moving/block averages.
+    
+    large: bool = True
+        Calculate large moving/block averages.
+    
+    cumulative: bool = True
+        Calculate cumulative averages.
+    
+    small_window_size: int = 100
+        Size of the smaller window/block
+        - specifies the size of the moving window if small_moving = True
+        - specifies the size of the blocks if small_moving = False
+    
+    large_window_size: int = 1000
+        Size of the larger window/block
+        - specifies the size of the moving window if large_moving = True
+        - specifies the size of the blocks if large_moving = False
+    
+    small_moving: bool = True
+        Whether to calculate moving or block averages for the smaller size
+        - moving averages are calculated if small_moving = True
+        - block averages are calculated if small_moving = False
+    
+    large_moving: bool = True
+        Whether to calculate moving or block averages for the larger size
+        - moving averages are calculated if large_moving = True
+        - block averages are calculated if large_moving = False
+        
+    Returns
+    -------
+        None
+        
+    '''
+    
+    g.SAVE = save
+    g.VERBOSE = verbose
+    g.SMALL = small
+    g.LARGE = large
+    g.CUMULATIVE = cumulative
+    g.SMALL_WINDOW_SIZE = small_window_size
+    g.LARGE_WINDOW_SIZE = large_window_size
+    g.SMALL_MOVING = small_moving
+    g.LARGE_MOVING = large_moving
         
     
 def analyze(fname, save=True, verbose=True,
             small=True, large=True, cumulative=True,
-            small_window_size=100, large_window_size=1000,
-            small_moving=True, large_moving=True):
+            small_window_size=-1, large_window_size=-1,
+            small_moving=False, large_moving=False):
+    
+    '''
+    Description
+    -----------
+    Calculate and display the block/moving/cumulative averages along each bit plane for each color.
+    
+    Params
+    ------
+    fname: str
+        Path to the image file.
+    
+    save: bool = True
+        Save the resulting figure.
+    
+    verbose: bool = True
+        Output program progress to the console.
+    
+    small: bool = True
+        Calculate small moving/block averages.
+    
+    large: bool = True
+        Calculate large moving/block averages.
+    
+    cumulative: bool = True
+        Calculate cumulative averages.
+    
+    small_block_size: int = -1
+        Size of the smaller blocks.
+        - specifies the size of the moving window if large_moving = True
+        - specifies the size of the blocks if large_moving = False
+            - When set to -1, the size of the smaller blocks is
+                 dynamically determined by analyze()
+    
+    large_block_size: int = -1
+        Size of the larger blocks.
+        - specifies the size of the moving window if large_moving = True
+        - specifies the size of the blocks if large_moving = False
+            - When set to -1, the size of the smaller blocks is
+                 dynamically determined by analyze()
+    
+    small_moving: bool = True
+        Whether to calculate moving or block averages for the smaller size
+        - moving averages are calculated if small_moving = True
+        - block averages are calculated if small_moving = False
+    
+    large_moving: bool = True
+        Whether to calculate moving or block averages for the larger size
+        - moving averages are calculated if large_moving = True
+        - block averages are calculated if large_moving = False
+    
+    Returns
+    -------
+    None
+    
+    '''
     
     im = Image.open(fname)
     pix = list(im.getdata())
@@ -284,6 +607,28 @@ def analyze(fname, save=True, verbose=True,
 
 def cumulative_averages(fname, save=True, verbose=True):
     
+    '''
+    Description
+    -----------
+    Calculate and display the cumulative averages along each bit plane for each color.
+    
+    Params
+    ------
+    fname: str
+        Path to the image file.
+    
+    save: bool = True
+        Save the resulting figure.
+    
+    verbose: bool = True
+        Output program progress to the console.
+    
+    Returns
+    -------
+        None
+        
+    '''
+    
     analyze(fname,
             save=save,
             small=False,
@@ -294,6 +639,49 @@ def cumulative_averages(fname, save=True, verbose=True):
 def block_averages(fname, save=True, verbose=True,
                    small=True, large=True, cumulative=True,
                    small_block_size=-1, large_block_size=-1):
+    
+    '''
+    Description
+    -----------
+    Calculate and display the block averages along each bit plane for each color.
+    The height of each block in the resulting of the graph is the standard deviation within the block.
+    
+    Params
+    ------
+    fname: str
+        Path to the image file.
+    
+    save: bool = True
+        Save the resulting figure.
+    
+    verbose: bool = True
+        Output program progress to the console.
+    
+    small: bool = True
+        Calculate small block averages.
+    
+    large: bool = True
+        Calculate large block averages.
+    
+    cumulative: bool = True
+        Calculate cumulative averages.
+    
+    small_block_size: int = -1
+        Size of the smaller blocks.
+        When set to -1, the size of the smaller blocks is
+            dynamically determined by analyze()
+    
+    large_block_size: int = -1
+        Size of the larger blocks.
+        When set to -1, the size of the larger blocks is
+            dynamically determined by analyze()
+    
+    Returns
+    -------
+        None
+        
+    '''
+
     analyze(fname,
             save=save,
             small=small,
@@ -306,8 +694,44 @@ def block_averages(fname, save=True, verbose=True,
 
 def moving_averages(fname, save=True, verbose=True,
                     small=True, large=True, cumulative=True,
-                    small_window_size=100, large_window_size=1000,
-                    small_moving=True, large_moving=True):
+                    small_window_size=100, large_window_size=1000):
+    
+    '''
+    Description
+    -----------
+    Calculate and display the moving averages along each bit plane for each color.
+    
+    Params
+    ------
+    fname: str
+        Path to the image file.
+    
+    save: bool = True
+        Save the resulting figure.
+    
+    verbose: bool = True
+        Output program progress to the console.
+    
+    small: bool = True
+        Calculate small moving averages.
+    
+    large: bool = True
+        Calculate large moving averages.
+    
+    cumulative: bool = True
+        Calculate cumulative averages.
+    
+    small_window_size: int = 100
+        Size of the smaller window.
+    
+    large_window_size: int = 1000
+        Size of the larger window.
+    
+    Returns
+    -------
+        None
+        
+    '''
     
     analyze(fname,
             save=save,
@@ -316,5 +740,5 @@ def moving_averages(fname, save=True, verbose=True,
             cumulative=cumulative,
             small_window_size=small_window_size,
             large_window_size=large_window_size,
-            small_moving=small_moving,
-            large_moving=large_moving)
+            small_moving=True,
+            large_moving=True)
