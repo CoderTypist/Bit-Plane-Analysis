@@ -15,7 +15,7 @@ class g:
     
     '''
     
-    # save resulting figures to a file
+    # save resulting figures to files
     SAVE = True
     # show the progress of the program
     VERBOSE = True
@@ -70,7 +70,7 @@ class Block:
             The index of the bit within the bit plane.
         
         size: int
-            The number of bits within the block used to calculate the mean and std.
+            The number of bits within the block.
 
         '''
         
@@ -342,28 +342,28 @@ def color_averages(color_vals: np.ndarray, color_name: str, base_name=None) -> N
 
     bit_planes = get_color_bit_planes(color_vals)
     
-    bit_plane_small_window_averages = None
-    bit_plane_large_window_averages = None
+    bit_plane_small_averages = None
+    bit_plane_large_averages = None
     bit_plane_cumulative_averages = None
     
     if g.SMALL:
-        if g.SMALL_MOVING: bit_plane_small_window_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_WINDOW_SIZE)
-        else: bit_plane_small_window_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_WINDOW_SIZE)
+        if g.SMALL_MOVING: bit_plane_small_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_WINDOW_SIZE)
+        else: bit_plane_small_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_WINDOW_SIZE)
         
     if g.LARGE: 
-        if g.LARGE_MOVING: bit_plane_large_window_averages = get_bit_plane_moving_averages(bit_planes, g.LARGE_WINDOW_SIZE)
-        else: bit_plane_large_window_averages = get_bit_plane_block_averages(bit_planes, g.LARGE_WINDOW_SIZE)
+        if g.LARGE_MOVING: bit_plane_large_averages = get_bit_plane_moving_averages(bit_planes, g.LARGE_WINDOW_SIZE)
+        else: bit_plane_large_averages = get_bit_plane_block_averages(bit_planes, g.LARGE_WINDOW_SIZE)
         
     if g.CUMULATIVE: bit_plane_cumulative_averages = get_bit_plane_moving_averages(bit_planes, 0)
     
     fig, axs = plt.subplots(4,2, figsize=(15, 10), constrained_layout=True)
     
     title = f'{color_name} - Averages: '
-    windows = []
-    if g.SMALL: windows.append(g.SMALL_WINDOW_SIZE)
-    if g.LARGE: windows.append(g.LARGE_WINDOW_SIZE)
-    if g.CUMULATIVE: windows.append('cumulative')
-    title += str(windows)
+    sizes = []
+    if g.SMALL: sizes.append(g.SMALL_WINDOW_SIZE)
+    if g.LARGE: sizes.append(g.LARGE_WINDOW_SIZE)
+    if g.CUMULATIVE: sizes.append('cumulative')
+    title += str(sizes)
     
     fig.suptitle(title, fontsize=30)
     axs_fontsize=25
@@ -377,9 +377,9 @@ def color_averages(color_vals: np.ndarray, color_name: str, base_name=None) -> N
         
         if g.LARGE:
             if g.LARGE_MOVING:
-                axs[r,c].plot(bit_plane_large_window_averages[i], color='gray', alpha=large_window_alpha)
+                axs[r,c].plot(bit_plane_large_averages[i], color='gray', alpha=large_window_alpha)
             else:
-                for blk in bit_plane_large_window_averages[i]:  
+                for blk in bit_plane_large_averages[i]:  
                     
                     rect = Rectangle((blk.start, blk.mean-(blk.std/2)), 
                                      blk.size, blk.std, 
@@ -393,9 +393,9 @@ def color_averages(color_vals: np.ndarray, color_name: str, base_name=None) -> N
         
         if g.SMALL: 
             if g.SMALL_MOVING:
-                axs[r,c].plot(bit_plane_small_window_averages[i], color='gray', alpha=small_window_alpha)
+                axs[r,c].plot(bit_plane_small_averages[i], color='gray', alpha=small_window_alpha)
             else:
-                for blk in bit_plane_small_window_averages[i]:  
+                for blk in bit_plane_small_averages[i]:  
                     
                     rect = Rectangle((blk.start, blk.mean-(blk.std/2)), 
                                      blk.size, blk.std, 
@@ -459,7 +459,7 @@ def pix_averages(pix: List[Tuple[int,int,int]], base_name=None) -> None:
 def set_config(save=True, verbose=True,
                small=True, large=True, cumulative=True,
                small_window_size=100, large_window_size=1000,
-               small_moving=True, large_moving=True:
+               small_moving=True, large_moving=True):
     
     '''
     Description
@@ -469,7 +469,7 @@ def set_config(save=True, verbose=True,
     Params
     ------
     save: bool = True
-        Save the resulting figure.
+        Save the resulting figures.
     
     verbose: bool = True
         Output program progress to the console.
@@ -536,7 +536,7 @@ def analyze(fname, save=True, verbose=True,
         Path to the image file.
     
     save: bool = True
-        Save the resulting figure.
+        Save the resulting figures.
     
     verbose: bool = True
         Output program progress to the console.
@@ -618,7 +618,7 @@ def cumulative_averages(fname, save=True, verbose=True):
         Path to the image file.
     
     save: bool = True
-        Save the resulting figure.
+        Save the resulting figures.
     
     verbose: bool = True
         Output program progress to the console.
@@ -652,7 +652,7 @@ def block_averages(fname, save=True, verbose=True,
         Path to the image file.
     
     save: bool = True
-        Save the resulting figure.
+        Save the resulting figures.
     
     verbose: bool = True
         Output program progress to the console.
@@ -707,7 +707,7 @@ def moving_averages(fname, save=True, verbose=True,
         Path to the image file.
     
     save: bool = True
-        Save the resulting figure.
+        Save the resulting figures.
     
     verbose: bool = True
         Output program progress to the console.
