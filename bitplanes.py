@@ -97,7 +97,7 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
     return bit_plane_averages
 
 
-def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size, bottom=25, middle=50, top=75) -> List[List[Block]]:
+def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> List[List[Block]]:
     
     bit_plane_block_averages: List[List[Block]] = [ [] for i in range(8) ]
     
