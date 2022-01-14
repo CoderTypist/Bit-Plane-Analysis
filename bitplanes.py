@@ -100,6 +100,7 @@ def get_red(pix: List[Tuple[int,int,int]]) -> np.ndarray:
     
     '''
     
+    # for each pixel, get the red value and typecast it to an unsigned 8-bit integer
     return np.array([ np.uint8(p[0]) for p in pix ])
 
 
@@ -123,6 +124,7 @@ def get_green(pix: List[Tuple[int,int,int]]) -> np.ndarray:
     
     '''
     
+    # for each pixel, get the green value and typecast it to an unsigned 8-bit integer
     return np.array([ np.uint8(p[1]) for p in pix ])
 
 
@@ -146,6 +148,7 @@ def get_blue(pix: List[Tuple[int,int,int]]) -> np.ndarray:
     
     '''
     
+    # for each pixel, get the blue value and typecast it to an unsigned 8-bit integer
     return np.array([ np.uint8(p[2]) for p in pix ])
 
 
@@ -174,14 +177,14 @@ def get_color_bit_planes(color: np.ndarray) -> List[List[np.uint8]]:
     bit_planes = [ [] for i in np.arange(8) ]
     
     for c in color:
-        bit_planes[7].append(1 if np.bitwise_and(c,128) else 0)
-        bit_planes[6].append(1 if np.bitwise_and(c,64) else 0)
-        bit_planes[5].append(1 if np.bitwise_and(c,32) else 0)
-        bit_planes[4].append(1 if np.bitwise_and(c,16) else 0)
-        bit_planes[3].append(1 if np.bitwise_and(c,8) else 0)
-        bit_planes[2].append(1 if np.bitwise_and(c,4) else 0)
-        bit_planes[1].append(1 if np.bitwise_and(c,2) else 0)
-        bit_planes[0].append(np.bitwise_and(c,1))
+        bit_planes[7].append(1 if np.bitwise_and(c,128) else 0) # & 0x80
+        bit_planes[6].append(1 if np.bitwise_and(c,64) else 0)  # & 0x40
+        bit_planes[5].append(1 if np.bitwise_and(c,32) else 0)  # & 0x20
+        bit_planes[4].append(1 if np.bitwise_and(c,16) else 0)  # & 0x10
+        bit_planes[3].append(1 if np.bitwise_and(c,8) else 0)   # & 0x08
+        bit_planes[2].append(1 if np.bitwise_and(c,4) else 0)   # & 0x04
+        bit_planes[1].append(1 if np.bitwise_and(c,2) else 0)   # & 0x02
+        bit_planes[0].append(np.bitwise_and(c,1))               # & 0x01
     
     return bit_planes
 
@@ -213,35 +216,49 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
 
     bit_plane_averages = [ [] for i in range(8) ]
     
+    # output average type
     if g.VERBOSE:
         if 0 == window_size:
             print('\t- cumulative:')
         else:
             print(f'\t- window size {window_size}:')
         print('\t\t- ', end='')
-            
-    for i_bp in np.arange(len(bit_planes)):
+    
+    # loop over each bit plane
+    for i_bp in np.arange(8):
         
+        # output current bit plane index
         if g.VERBOSE: print(f'{i_bp} ', end='')
+        # get bit plane
         bp = bit_planes[i_bp]
+        # cumulative sum of bits (only used for the cumulative averages)
         bp_sum = 0
         
+        # loop over each bit in the bit plane
         for i_val in np.arange(len(bp)):
+            
+            # add bit (0 or 1) to the sum
             bp_sum += bp[i_val]
             
             # cumulative averages
             if 0 == window_size:
                 bit_plane_averages[i_bp].append(bp_sum/(i_val+1))
             
-            # percentage within the window
+            # moving averages
             else:
+                # starting index of the moving window
                 i_start = i_val - window_size
                 
+                # towards the beginning, the window size will be smaller than the specified size
+                # because of this, i_start needs to be set to 0 as the window grows
                 if i_start <= 0:
                     i_start = i_val + 1
-                    
-                i_end = i_val + 2
+                
+                # numpy indexing does not include the last number, so add 1
+                i_end = i_val + 1
+                # the size of the current window
                 current_window_size = i_end - i_start
+                # the average within the window
                 bit_plane_averages[i_bp].append(np.sum(bp[i_start:i_end])/current_window_size)
                 
     print()
@@ -276,16 +293,20 @@ def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> 
     
     bit_plane_block_averages: List[List[Block]] = [ [] for i in range(8) ]
     
+    # output average type
     if g.VERBOSE:
         if 0 == blk_size:
             print('\t- cumulative:')
         else:
             print(f'\t- block size {blk_size}:')
         print('\t\t- ', end='')
-            
-    for i_bp in np.arange(len(bit_planes)):
+    
+    # loop over each bit plane
+    for i_bp in np.arange(8):
         
+        # output current bit plane index
         if g.VERBOSE: print(f'{i_bp} ', end='')
+        # get bit plane
         bp = bit_planes[i_bp]
         len_bp = len(bp)
         
