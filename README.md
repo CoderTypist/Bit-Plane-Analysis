@@ -86,7 +86,7 @@ bp.moving_averages('some_image.png', large=False)
 ```
 ##### Adjust Window Sizes
 ```
-bp.moving_averages('some_image.png', small_block_size=1000, large_block_size=10000)
+bp.moving_averages('some_image.png', small_window_size=1000, large_window_size=10000)
 ```
 ##### Do not Save Figures
 ```
