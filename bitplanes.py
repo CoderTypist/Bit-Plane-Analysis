@@ -2,7 +2,7 @@ from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
     
     
 class g:
@@ -30,11 +30,11 @@ class g:
     # size of the smaller window/block
     # - specifies the size of the moving window if SMALL_MOVING = True
     # - specifies the size of the blocks if SMALL_MOVING = False
-    SMALL_WINDOW_SIZE = 100
+    SMALL_SIZE = 100
     # size of the larger window/block
     # - specifies the size of the moving window if LARGE_MOVING = True
     # - specifies the size of the blocks if LARGE_MOVING = False
-    LARGE_WINDOW_SIZE = 1000
+    LARGE_SIZE = 1000
     
     # whether to calculate moving or block averages for the smaller size
     # - moving averages are calculated if SMALL_MOVING = True
@@ -213,7 +213,8 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
             containing the moving averages for a bit plane. 
     
     '''
-
+    
+    # each list contains the averages for the respective bit plane
     bit_plane_averages = [ [] for i in range(8) ]
     
     # output average type
@@ -256,7 +257,6 @@ def get_bit_plane_moving_averages(bit_planes: List[List[np.uint8]], window_size)
                 
                 # numpy indexing does not include the last number, so add 1
                 i_end = i_val + 1
-                # the size of the current window
                 current_window_size = i_end - i_start
                 # the average within the window
                 bit_plane_averages[i_bp].append(np.sum(bp[i_start:i_end])/current_window_size)
@@ -291,6 +291,7 @@ def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> 
         
     '''
     
+    # each list contains the averages for the respective bit plane
     bit_plane_block_averages: List[List[Block]] = [ [] for i in range(8) ]
     
     # output average type
@@ -308,25 +309,35 @@ def get_bit_plane_block_averages(bit_planes: List[List[np.uint8]], blk_size) -> 
         if g.VERBOSE: print(f'{i_bp} ', end='')
         # get bit plane
         bp = bit_planes[i_bp]
+        # number of pixels in the bit plane
         len_bp = len(bp)
         
+        # loop over each block on the bit plane
         for i_start in np.arange(0, len_bp, blk_size):
             
+            # number of bits from i_start to the end of the bit plane
             to_end = len_bp - i_start
             
             i_end = 0
             cur_blk_size = 0
             
+            # if the number of remaining bits is less than the block size
             if to_end < blk_size:
                 i_end = len_bp
                 cur_blk_size = to_end
+            # there are enough bits to make a complete block
             else:
                 i_end = i_start + blk_size
                 cur_blk_size = blk_size
-                
+            
+            # extract the block from the bit plane
             blk = bp[i_start:i_end]
+            # mean is between 0 and 1
             mean = np.mean(blk)
+            # standard deviation is between 0 and 1
             std = np.std(blk)
+            # store the mean, standard deviation, start of the block, and block size in a Block object
+            # then append the Block object to the list of averages
             bit_plane_block_averages[i_bp].append(Block(mean, std, i_start, cur_blk_size))
     
     print()
@@ -360,85 +371,124 @@ def color_averages(color_vals: np.ndarray, color_name: str, base_name=None) -> N
     None
     
     '''
-
-    bit_planes = get_color_bit_planes(color_vals)
     
-    bit_plane_small_averages = None
-    bit_plane_large_averages = None
+    # given a list of color values (i.e. red, green, or blue), extract the bit from each bit plane
+    bit_planes: List[List[np.uint8]] = get_color_bit_planes(color_vals)
+    
+    # The structure of bit_plane_small_averages depends on whether a moving or block average is being calculated
+    # - if g.SMALL_MOVING = True, it will be of type List[List[float]]
+    # - if g.SMALL_MOVING = False, it will be of type List[List[Block]]
+    bit_plane_small_averages: Union[ List[List[float]], List[List[Block]] ] = None
+    
+    # The structure of bit_plane_large_averages depends on whether a moving or block average is being calculated
+    # - if g.SMALL_MOVING = True, it will be of type List[List[float]]
+    # - if g.SMALL_MOVING = False, it will be of type List[List[Block]]
+    bit_plane_large_averages: Union[ List[List[float]], List[List[Block]] ] = None
     bit_plane_cumulative_averages = None
     
+    # if calculating averages for the smaller size
     if g.SMALL:
-        if g.SMALL_MOVING: bit_plane_small_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_WINDOW_SIZE)
-        else: bit_plane_small_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_WINDOW_SIZE)
-        
+        # if calculating moving averages
+        if g.SMALL_MOVING: bit_plane_small_averages = get_bit_plane_moving_averages(bit_planes, g.SMALL_SIZE)
+        # if calculating block averages
+        else: bit_plane_small_averages = get_bit_plane_block_averages(bit_planes, g.SMALL_SIZE)
+    
+    # if calculating averages for the larger size
     if g.LARGE: 
-        if g.LARGE_MOVING: bit_plane_large_averages = get_bit_plane_moving_averages(bit_planes, g.LARGE_WINDOW_SIZE)
-        else: bit_plane_large_averages = get_bit_plane_block_averages(bit_planes, g.LARGE_WINDOW_SIZE)
-        
+        # if calculating moving averages
+        if g.LARGE_MOVING: bit_plane_large_averages = get_bit_plane_moving_averages(bit_planes, g.LARGE_SIZE)
+        # if calculating block averages
+        else: bit_plane_large_averages = get_bit_plane_block_averages(bit_planes, g.LARGE_SIZE)
+    
+    # if calculating cumulative averages
     if g.CUMULATIVE: bit_plane_cumulative_averages = get_bit_plane_moving_averages(bit_planes, 0)
     
+    # create 8 subplots, one for each bit plane
+    # contrained_layout helps space out the subplots so that they don't overlap
     fig, axs = plt.subplots(4,2, figsize=(15, 10), constrained_layout=True)
     
+    # create the title for the figure
     title = f'{color_name} - Averages: '
     sizes = []
-    if g.SMALL: sizes.append(g.SMALL_WINDOW_SIZE)
-    if g.LARGE: sizes.append(g.LARGE_WINDOW_SIZE)
+    if g.SMALL: sizes.append(g.SMALL_SIZE)
+    if g.LARGE: sizes.append(g.LARGE_SIZE)
     if g.CUMULATIVE: sizes.append('cumulative')
     title += str(sizes)
     
     fig.suptitle(title, fontsize=30)
     axs_fontsize=25
     
+    # amount of transparency to use when plotting the averages
     small_window_alpha=0.2
     large_window_alpha=0.4
     
+    # loop over each bit plane
     for i in np.arange(8):
+        # determine the row and column of the subplot
         r = i % 4
         c = i // 4
         
+        # if calculating averages for the larger size
         if g.LARGE:
+            # if calculating moving averages
             if g.LARGE_MOVING:
+                # plot the moving averages
                 axs[r,c].plot(bit_plane_large_averages[i], color='gray', alpha=large_window_alpha)
-            else:
+            # if calculating block averages
+            else:    
+                # loop over each block
                 for blk in bit_plane_large_averages[i]:  
-                    
+                    # rectangle y is determined by the average within the block
+                    # rectangle height is the standard deviation within the block
                     rect = Rectangle((blk.start, blk.mean-(blk.std/2)), 
                                      blk.size, blk.std, 
                                      facecolor='gray', edgecolor='black',
                                      alpha=large_window_alpha)
+                    # draw the rectangle
                     axs[r,c].add_patch(rect)
-                    
+                    # draw a line through the middle of the rectangle showing the block average
                     axs[r,c].plot([blk.start, blk.start+blk.size],
                                   [blk.mean, blk.mean],
                                   linewidth=3, color='cyan')
         
+        # if calculating averages for the smaller size
         if g.SMALL: 
+            # if calculating moving averages
             if g.SMALL_MOVING:
+                # plot the moving averages
                 axs[r,c].plot(bit_plane_small_averages[i], color='gray', alpha=small_window_alpha)
+            # if calculating block averages
             else:
+                # loop over each block
                 for blk in bit_plane_small_averages[i]:  
-                    
+                    # rectangle y is determined by the average within the block
+                    # rectangle height is the standard deviation within the block
                     rect = Rectangle((blk.start, blk.mean-(blk.std/2)), 
                                      blk.size, blk.std, 
                                      facecolor='gray', edgecolor='black',
                                      alpha=small_window_alpha)
+                    # draw the rectangle
                     axs[r,c].add_patch(rect)
-                    
+                    # draw a line through the middle of the rectangle showing the block average
                     axs[r,c].plot([blk.start, blk.start+blk.size],
                                   [blk.mean, blk.mean],
                                   linewidth=3, color='orange')
         
+        # plot the cumulative averages
         if g.CUMULATIVE: axs[r,c].plot(bit_plane_cumulative_averages[i], color=color_name)
+        
+        # titles and lables for the subplot
         axs[r,c].set_title(f'bit plane {i}', fontsize=axs_fontsize)
         axs[r,c].set_xlabel('Number of Bytes')
         axs[r,c].set_ylabel('Average')
     
+    # save figure to a file
     if g.SAVE:
         fname = 'results'
         if base_name: fname += f'_{base_name}'
         fname += f'_{color_name.lower()}'
-        if g.SMALL: fname += f'_{g.SMALL_WINDOW_SIZE}'
-        if g.LARGE: fname += f'_{g.LARGE_WINDOW_SIZE}'
+        if g.SMALL: fname += f'_{g.SMALL_SIZE}'
+        if g.LARGE: fname += f'_{g.LARGE_SIZE}'
         if g.CUMULATIVE: fname += '_cumulative'
         fname += '.png'
         plt.savefig(fname)
@@ -466,21 +516,24 @@ def pix_averages(pix: List[Tuple[int,int,int]], base_name=None) -> None:
     None
     
     '''
-
+    
+    # plot averages along red bit planes
     if g.VERBOSE: print('RED:')
     color_averages(get_red(pix), 'Red', base_name=base_name)
     
+    # plot averages along blue bit planes
     if g.VERBOSE: print('GREEN:')
     color_averages(get_green(pix), 'Green', base_name=base_name)
     
+    # plot averages along green bit planes
     if g.VERBOSE: print('BLUE:')
     color_averages(get_blue(pix), 'Blue', base_name=base_name)
 
 
 def set_config(save=True, verbose=True,
                small=True, large=True, cumulative=True,
-               small_window_size=100, large_window_size=1000,
-               small_moving=True, large_moving=True):
+               small_size=-1, large_size=-1,
+               small_moving=False, large_moving=False):
     
     '''
     Description
@@ -504,22 +557,26 @@ def set_config(save=True, verbose=True,
     cumulative: bool = True
         Calculate cumulative averages.
     
-    small_window_size: int = 100
-        Size of the smaller window/block
-        - specifies the size of the moving window if small_moving = True
-        - specifies the size of the blocks if small_moving = False
-    
-    large_window_size: int = 1000
-        Size of the larger window/block
+    small_block_size: int = -1
+        Size of the smaller blocks.
         - specifies the size of the moving window if large_moving = True
         - specifies the size of the blocks if large_moving = False
+            - When set to -1, the size of the smaller blocks is
+                 dynamically determined by analyze()
     
-    small_moving: bool = True
+    large_block_size: int = -1
+        Size of the larger blocks.
+        - specifies the size of the moving window if large_moving = True
+        - specifies the size of the blocks if large_moving = False
+            - When set to -1, the size of the smaller blocks is
+                 dynamically determined by analyze()
+    
+    small_moving: bool = False
         Whether to calculate moving or block averages for the smaller size
         - moving averages are calculated if small_moving = True
         - block averages are calculated if small_moving = False
     
-    large_moving: bool = True
+    large_moving: bool = False
         Whether to calculate moving or block averages for the larger size
         - moving averages are calculated if large_moving = True
         - block averages are calculated if large_moving = False
@@ -535,15 +592,15 @@ def set_config(save=True, verbose=True,
     g.SMALL = small
     g.LARGE = large
     g.CUMULATIVE = cumulative
-    g.SMALL_WINDOW_SIZE = small_window_size
-    g.LARGE_WINDOW_SIZE = large_window_size
+    g.SMALL_SIZE = small_size
+    g.LARGE_SIZE = large_size
     g.SMALL_MOVING = small_moving
     g.LARGE_MOVING = large_moving
         
     
 def analyze(fname, save=True, verbose=True,
             small=True, large=True, cumulative=True,
-            small_window_size=-1, large_window_size=-1,
+            small_size=-1, large_size=-1,
             small_moving=False, large_moving=False):
     
     '''
@@ -585,12 +642,12 @@ def analyze(fname, save=True, verbose=True,
             - When set to -1, the size of the smaller blocks is
                  dynamically determined by analyze()
     
-    small_moving: bool = True
+    small_moving: bool = False
         Whether to calculate moving or block averages for the smaller size
         - moving averages are calculated if small_moving = True
         - block averages are calculated if small_moving = False
     
-    large_moving: bool = True
+    large_moving: bool = False
         Whether to calculate moving or block averages for the larger size
         - moving averages are calculated if large_moving = True
         - block averages are calculated if large_moving = False
@@ -602,27 +659,33 @@ def analyze(fname, save=True, verbose=True,
     '''
     
     im = Image.open(fname)
-    pix = list(im.getdata())
+    # list containing color values for each pixel
+    pix: List[List[Tuple[int,int,int]]] = list(im.getdata())
     
-    if -1 == small_window_size:
+    # dynamically set small size
+    if -1 == small_size:
         num_pixels = len(pix)
-        small_window_size = num_pixels // 40
+        small_size = num_pixels // 40
     
-    if -1 == large_window_size:
+    # dynamically set large size
+    if -1 == large_size:
         num_pixels = len(pix)
-        large_window_size = num_pixels // 8
+        large_size = num_pixels // 8
         
     set_config(save=save,
                verbose=verbose,
                small=small,
                large=large,
                cumulative=cumulative,
-               small_window_size=small_window_size,
-               large_window_size=large_window_size,
+               small_size=small_size,
+               large_size=large_size,
                small_moving=small_moving,
                large_moving=large_moving)
     
+    # part of the filename leading up to the first '.'
+    # used to construct the name of the output file containing the graph.
     base_name = fname.split('.')[0]
+    # plot bit plane averages for each color (i.e., red, green, and blue)
     pix_averages(pix, base_name=base_name)
     
 
@@ -708,14 +771,14 @@ def block_averages(fname, save=True, verbose=True,
             small=small,
             large=large,
             cumulative=cumulative,
-            small_window_size=small_block_size,
-            large_window_size=large_block_size,
+            small_size=small_block_size,
+            large_size=large_block_size,
             small_moving=False, large_moving=False)
 
 
 def moving_averages(fname, save=True, verbose=True,
                     small=True, large=True, cumulative=True,
-                    small_window_size=100, large_window_size=1000):
+                    small_size=100, large_size=1000):
     
     '''
     Description
@@ -742,10 +805,10 @@ def moving_averages(fname, save=True, verbose=True,
     cumulative: bool = True
         Calculate cumulative averages.
     
-    small_window_size: int = 100
+    small_size: int = 100
         Size of the smaller window.
     
-    large_window_size: int = 1000
+    large_size: int = 1000
         Size of the larger window.
     
     Returns
@@ -759,7 +822,7 @@ def moving_averages(fname, save=True, verbose=True,
             small=small,
             large=large,
             cumulative=cumulative,
-            small_window_size=small_window_size,
-            large_window_size=large_window_size,
+            small_size=small_size,
+            large_size=large_size,
             small_moving=True,
             large_moving=True)
